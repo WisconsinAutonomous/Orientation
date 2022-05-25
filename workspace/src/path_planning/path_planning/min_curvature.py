@@ -21,13 +21,22 @@ def main():
     points = wa.load_waypoints_from_csv(filename, delimiter=",")
 
     # Create the path
-    path = wa.WASplinePath(points, num_points=20, is_closed=True)
+    path = wa.WASplinePath(points, num_points=1000, is_closed=True)
     # Create the track with a constant width
     track = wa.create_constant_width_track(path, width=10)
 
-    print('here')
-    print(track.left.calc_curvature())
-    track.left.plot()
+    curv = track.center.calc_curvature()
+
+    fix, ax = plt.subplots()
+
+    ax.axes.set_aspect('equal')
+    for i in range(len(track.center.get_points())):
+        if i % 50 == 0:
+            ax.annotate(curv[i], (track.center.get_points()[i][0], track.center.get_points()[i][1]))
+            ax.scatter(track.center.get_points()[i][0], track.center.get_points()[i][1], color='red')
+            print(curv[i])
+
+    track.center.plot()
     
     # get_path(track, num_segments=args.segments, nodes_per_segment=args.nodes)
 
