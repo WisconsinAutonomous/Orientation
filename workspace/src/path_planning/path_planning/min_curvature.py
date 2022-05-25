@@ -15,6 +15,8 @@ def main():
     main method. sets up track 
     """
     # Load data points from a csv file
+    wa.set_wa_data_directory('..')
+
     filename = wa.get_wa_data_file("paths/sample_medium_loop.csv")
     points = wa.load_waypoints_from_csv(filename, delimiter=",")
 
@@ -22,8 +24,12 @@ def main():
     path = wa.WASplinePath(points, num_points=20, is_closed=True)
     # Create the track with a constant width
     track = wa.create_constant_width_track(path, width=10)
+
+    print('here')
+    print(track.left.calc_curvature())
+    track.left.plot()
     
-    get_path(track, num_segments=args.segments, nodes_per_segment=args.nodes)
+    # get_path(track, num_segments=args.segments, nodes_per_segment=args.nodes)
 
 class Node:
     """
@@ -137,15 +143,15 @@ def get_path(track, num_segments=50, nodes_per_segment=5):
 
     # pick the point on the segment based off the curvature of the splines
     # possibly incorporate min distance also
-
-    print(track.left.calc_curvature)  # keep track if the point idx and use that to get the curvature at each point
+    # print('here')
+    # print(track.left.calc_curvature())  # keep track if the point idx and use that to get the curvature at each point
     # track.right.calc_curvature
 
+    
 
 
 
-
-
+    # path = wa.WASplinePath(points, num_points=1000)
     # ------------
     # Plot results
     # ------------
@@ -181,7 +187,7 @@ def get_path(track, num_segments=50, nodes_per_segment=5):
         original_track.left.plot("black", show=False)
         original_track.right.plot("black")
 
-    return path
+    # return path
 
 if __name__ == "__main__":
     main()
