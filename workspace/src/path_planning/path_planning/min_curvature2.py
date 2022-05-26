@@ -6,7 +6,6 @@ import time
 
 # Command line arguments
 parser = wa.WAArgumentParser(use_sim_defaults=False)
-parser.add_argument("-p", "--plot", action="store_true", help="Plot results", default=False)
 parser.add_argument("-s", "--segments", type=int, help="Number of segments", default=50)
 parser.add_argument("-n", "--nodes", type=int, help="Number of nodes per segment", default=5)
 args = parser.parse_args()
@@ -91,6 +90,8 @@ def get_path(track, num_segments=50, nodes_per_segment=5):
     points = []
     # for segment in segments:
     for i in range(0, len(segments)):
+
+        # clip curvature and shift + scale up to represent alpha
         alpha = (min(max(curv[i], -.05), .05) + .05) * 10
         # print(alpha)
         print(curv[i], alpha)
@@ -104,40 +105,39 @@ def get_path(track, num_segments=50, nodes_per_segment=5):
     # Plot results
     # ------------
 
-    if args.plot:
-        # 1
-        fix, ax = plt.subplots()
+    # 1
+    fix, ax = plt.subplots()
 
-        ax.axes.set_aspect('equal')
-        for i in range(len(track.center.get_points())):
-            if i % 50 == 0:
-                ax.annotate(curv[i], (track.center.get_points()[i][0], track.center.get_points()[i][1]))
-                ax.scatter(track.center.get_points()[i][0], track.center.get_points()[i][1], color='red')
+    ax.axes.set_aspect('equal')
+    for i in range(len(track.center.get_points())):
+        if i % 50 == 0:
+            ax.annotate(curv[i], (track.center.get_points()[i][0], track.center.get_points()[i][1]))
+            ax.scatter(track.center.get_points()[i][0], track.center.get_points()[i][1], color='red')
 
-        track.center.plot()
+    track.center.plot()
 
-        # 2
-        print("Plotting")
-        plt.subplot(1, 2, 1) 
-        plt.axis('equal')
-        for i in range(num_segments):
-            plt.plot([segments[i].left.x, segments[i].right.x], [segments[i].left.y, segments[i].right.y], 'r-')
-        # plot selected points
-        for point in points:
-            plt.plot(point[0], point[1], "ro")
-        track.left.plot("black", show=False)
-        track.right.plot("black", show=False)
-        path.plot("red", show=False)
-        original_track.left.plot("black", show=False)
-        original_track.right.plot("black", show=False)
+    # 2
+    print("Plotting")
+    plt.subplot(1, 2, 1) 
+    plt.axis('equal')
+    for i in range(num_segments):
+        plt.plot([segments[i].left.x, segments[i].right.x], [segments[i].left.y, segments[i].right.y], 'r-')
+    # plot selected points
+    for point in points:
+        plt.plot(point[0], point[1], "ro")
+    track.left.plot("black", show=False)
+    track.right.plot("black", show=False)
+    path.plot("red", show=False)
+    original_track.left.plot("black", show=False)
+    original_track.right.plot("black", show=False)
 
-        # 3 - final path
-        plt.subplot(1, 2, 2) 
-        plt.axis('equal')
-        # plot
-        path.plot("red", show=False)
-        original_track.left.plot("black", show=False)
-        original_track.right.plot("black")
+    # 3 - final path
+    plt.subplot(1, 2, 2) 
+    plt.axis('equal')
+    # plot
+    path.plot("red", show=False)
+    original_track.left.plot("black", show=False)
+    original_track.right.plot("black")
 
     return path
 

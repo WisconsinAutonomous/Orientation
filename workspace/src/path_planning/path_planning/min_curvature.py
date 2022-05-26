@@ -6,7 +6,6 @@ import time
 
 # Command line arguments
 parser = wa.WAArgumentParser(use_sim_defaults=False)
-parser.add_argument("-p", "--plot", action="store_true", help="Plot results", default=False)
 parser.add_argument("-s", "--segments", type=int, help="Number of segments", default=50)
 parser.add_argument("-n", "--nodes", type=int, help="Number of nodes per segment", default=5)
 args = parser.parse_args()
@@ -153,31 +152,30 @@ def get_path(track, num_segments=50, nodes_per_segment=5):
     # Plot results
     # ------------
 
-    if args.plot:
-        # 1 - all nodes
-        print("Plotting nodes")
-        plt.subplot(1, 2, 1) 
-        plt.axis('equal')
-        # plot nodes 
-        for segment in segments:
-            for node in segment: 
-                plt.plot(node.x, node.y, "ko")
-        # plot selected nodes
-        for point in points:
-            plt.plot(point[0], point[1], "ro")
-        track.left.plot("black", show=False)
-        track.right.plot("black", show=False)
-        path.plot("red", show=False)
-        original_track.left.plot("black", show=False)
-        original_track.right.plot("black", show=False)
+    # 1 - all nodes
+    print("Plotting nodes")
+    plt.subplot(1, 2, 1) 
+    plt.axis('equal')
+    # plot nodes 
+    for segment in segments:
+        for node in segment: 
+            plt.plot(node.x, node.y, "ko")
+    # plot selected nodes
+    for point in points:
+        plt.plot(point[0], point[1], "ro")
+    track.left.plot("black", show=False)
+    track.right.plot("black", show=False)
+    path.plot("red", show=False)
+    original_track.left.plot("black", show=False)
+    original_track.right.plot("black", show=False)
 
-        # 2 - final path
-        plt.subplot(1, 2, 2) 
-        plt.axis('equal')
-        # plot
-        path.plot("red", show=False)
-        original_track.left.plot("black", show=False)
-        original_track.right.plot("black")
+    # 2 - final path
+    plt.subplot(1, 2, 2) 
+    plt.axis('equal')
+    # plot
+    path.plot("red", show=False)
+    original_track.left.plot("black", show=False)
+    original_track.right.plot("black")
 
     return path
 
