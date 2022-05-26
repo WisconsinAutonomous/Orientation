@@ -147,21 +147,15 @@ def get_path(track, num_segments=50, nodes_per_segment=5):
         # plot selected nodes
         for point in points:
             plt.plot(point[0], point[1], "ro")
-            #print("plotted segmentaion " + str(i) + "/" + str(len(nodes)))
         track.left.plot("black", show=False)
         track.right.plot("black", show=False)
         path.plot("red", show=False)
         original_track.left.plot("black", show=False)
         original_track.right.plot("black", show=False)
 
-        # 2 - final path + distance
+        # 2 - final path
         plt.subplot(1, 2, 2) 
         plt.axis('equal')
-        # compute distance
-        distance = 0
-        for i in range(1, len(points)):
-            distance += math.sqrt((points[i][0] - points[i-1][0]) ** 2 + (points[i][1] - points[i-1][1]) ** 2)
-        plt.title("distance: " + str(distance))
         # plot
         path.plot("red", show=False)
         original_track.left.plot("black", show=False)
