@@ -7,7 +7,6 @@ import time
 # Command line arguments
 parser = wa.WAArgumentParser(use_sim_defaults=False)
 parser.add_argument("-s", "--segments", type=int, help="Number of segments", default=50)
-parser.add_argument("-n", "--nodes", type=int, help="Number of nodes per segment", default=5)
 args = parser.parse_args()
 
 
@@ -25,10 +24,8 @@ def main():
     path = wa.WASplinePath(points, num_points=1000, is_closed=True)
     # Create the track with a constant width
     track = wa.create_constant_width_track(path, width=10)
-
-    curv = track.center.calc_curvature()
     
-    get_path(track, num_segments=args.segments, nodes_per_segment=args.nodes)
+    get_path(track, num_segments=args.segments)
 
 
 class Segment:
@@ -55,13 +52,12 @@ class Segment:
         self.y_dist = self.left.y - self.right.y
 
 
-def get_path(track, num_segments=50, nodes_per_segment=5):
+def get_path(track, num_segments=50):
     """
     finds minimum curvature path on a given track
     Args:
         track (WATrack): track to find path on
         num_segments (int): number of segments
-        nodes_per_segment (int): number of nodes per segment
     Returns:
         WASplinePath : Dijkstra's shortest path
     """
@@ -70,33 +66,36 @@ def get_path(track, num_segments=50, nodes_per_segment=5):
     track = wa.create_constant_width_track(track.center, width=width)
 
     # ------------
-    # Create nodes
+    # Create segments
     # ------------
 
-    print("Creating node set...")
+    # print("Creating segments...")
 
     segments = [] # array of segments throughout the track
     for i in range(num_segments):
-        index = int(i*(len(track.center.get_points())/num_segments))
-        segments.append(Segment(track, index))
-    print("All nodes created")
+        idx = int(1000*i/num_segments)
+        segments.append(Segment(track, idx))
+    # print("All nodes created")
 
     # -------------
     # Generate path
     # -------------
 
     curv = track.center.calc_curvature()
+    min_curv = min(curv)
+    max_curv = max(curv)
 
     points = []
+    alphas = []
     # for segment in segments:
-    for i in range(0, len(segments)):
-
-        # clip curvature and shift + scale up to represent alpha
-        alpha = (min(max(curv[i], -.05), .05) + .05) * 10
+    for i in range(0, num_segments):
+        idx = int(len(curv)*i/num_segments)
+        # shift curvature + scale up to get alpha
+        alphas.append((curv[idx] + abs(min_curv)) / (abs(max_curv) + abs(min_curv)))
         # print(alpha)
-        print(curv[i], alpha)
-        point_x = segments[i].left.x + (segments[i].right.x - segments[i].left.x) * alpha
-        point_y = segments[i].left.y + (segments[i].right.y - segments[i].left.y) * alpha
+        print(curv[idx], alphas[i])
+        point_x = segments[i].right.x + (segments[i].left.x - segments[i].right.x) * alphas[i]
+        point_y = segments[i].right.y + (segments[i].left.y - segments[i].right.y) * alphas[i]
         points.append([point_x, point_y, 0])
 
     path = wa.WASplinePath(points, num_points=1000)
@@ -106,18 +105,14 @@ def get_path(track, num_segments=50, nodes_per_segment=5):
     # ------------
 
     # 1
-    fix, ax = plt.subplots()
-
-    ax.axes.set_aspect('equal')
+    plt.axis('equal')
     for i in range(len(track.center.get_points())):
         if i % 50 == 0:
-            ax.annotate(curv[i], (track.center.get_points()[i][0], track.center.get_points()[i][1]))
-            ax.scatter(track.center.get_points()[i][0], track.center.get_points()[i][1], color='red')
-
+            plt.annotate(curv[i], (track.center.get_points()[i][0], track.center.get_points()[i][1]))
+            plt.scatter(track.center.get_points()[i][0], track.center.get_points()[i][1], color='red')
     track.center.plot()
 
     # 2
-    print("Plotting")
     plt.subplot(1, 2, 1) 
     plt.axis('equal')
     for i in range(num_segments):
@@ -138,6 +133,14 @@ def get_path(track, num_segments=50, nodes_per_segment=5):
     path.plot("red", show=False)
     original_track.left.plot("black", show=False)
     original_track.right.plot("black")
+
+    # data
+    num_points = len(path.get_points())
+    plt.plot(range(num_points), path.calc_curvature(), label="path curvature")
+    plt.plot(range(num_points), track.center.calc_curvature(), label="track curvature")
+    plt.plot(range(0, num_points, int(num_points/num_segments)), alphas, label="alphas")
+    plt.legend()
+    plt.show()
 
     return path
 
