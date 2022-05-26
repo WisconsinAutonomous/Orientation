@@ -124,10 +124,28 @@ def get_path(track, num_segments=50, nodes_per_segment=5):
     # track.right.calc_curvature
 
     ## PLACEHOLDER
+    
+        
+
+
+    curv = track.center.calc_curvature()
 
     points = []
-    for segment in segments:
-        points.append((segment[0].x, segment[0].y, 0))
+    # for segment in segments:
+    for i in range(0, len(segments)):
+        idx = 3
+        if -0.2 <= curv[i] <= 0.2:
+            idx = 2
+        if -0.5 <= curv[i] <= -0.2:
+            idx = 1
+        if curv[i] <= -0.5:
+            idx = 0
+        if 0.2 <= curv[i] <= 0.5:
+            idx = 3
+        if .5 <= curv[i]:
+            idx = 3
+
+        points.append((segments[i][idx].x, segments[i][idx].y, 0))
 
     path = wa.WASplinePath(points, num_points=1000)
 
