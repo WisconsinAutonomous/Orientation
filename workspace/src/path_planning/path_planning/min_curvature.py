@@ -3,12 +3,14 @@ import matplotlib.pyplot as plt
 import math
 import time
 
+
 # Command line arguments
 parser = wa.WAArgumentParser(use_sim_defaults=False)
 parser.add_argument("-p", "--plot", action="store_true", help="Plot results", default=False)
 parser.add_argument("-s", "--segments", type=int, help="Number of segments", default=50)
 parser.add_argument("-n", "--nodes", type=int, help="Number of nodes per segment", default=5)
 args = parser.parse_args()
+
 
 def main():
     """
@@ -38,7 +40,8 @@ def main():
 
     track.center.plot()
     
-    # get_path(track, num_segments=args.segments, nodes_per_segment=args.nodes)
+    get_path(track, num_segments=args.segments, nodes_per_segment=args.nodes)
+
 
 class Node:
     """
@@ -51,21 +54,7 @@ class Node:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.edges = []
 
-class Edge:
-    """
-    Represents an Edge between two nodes
-    Attributes
-        a, b (Node): nodes connected by the edge
-        cost (float): cost of traveling from node a to b
-    """
-
-    def __init__(self, a, b):
-        self.a = a
-        self.b = b
-        # COST FUNCTION (currently distance)
-        self.cost = math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2)
 
 def create_segment(track, index, size):
     """
@@ -94,9 +83,10 @@ def create_segment(track, index, size):
 
     return nodes
 
+
 def get_path(track, num_segments=50, nodes_per_segment=5):
     """
-    finds Dijkstra's shortest path on a given track
+    finds minimum curvature path on a given track
     Args:
         track (WATrack): track to find path on
         num_segments (int): number of segments
@@ -112,39 +102,16 @@ def get_path(track, num_segments=50, nodes_per_segment=5):
     # Create nodes
     # ------------
 
-    start = time.time()
-
     print("Creating node set...")
 
-    nodes = [] # array of all Nodes throughout the track
-
+    segments = [] # array of segments throughout the track
     for i in range(num_segments):
-        nodes_x = []
-        nodes_y = []
         index = int(i*(len(track.center.get_points())/num_segments))
-        segment = create_segment(track, index, nodes_per_segment)
-        for j in range(nodes_per_segment):
-            nodes.append(segment[j])
-            if args.plot:
-                nodes_x.append(nodes[(i * nodes_per_segment) + j].x)
-                nodes_y.append(nodes[(i * nodes_per_segment) + j].y)
-                plt.plot(nodes_x, nodes_y, "b-") # plot segment line
-        #print("Created segmentaion " + str(i) + "/" + str(count))
+        segments.append(create_segment(track, index, nodes_per_segment))
+        if args.plot:
+            for j in range(nodes_per_segment):
+                plt.scatter(segments[i][j].x, segments[i][j].y, color='blue')
     print("All nodes created")
-
-    # ------------
-    # Create edges
-    # ------------
-
-    print("Creating edges...")
-
-    for i in range(num_segments):
-        for j in range(nodes_per_segment):
-            for k in range(nodes_per_segment):
-                #print("nodeA index: " + str((i * size) + j) + " nodeB index: " + str((((i + 1) % count) * size) + k))
-                nodes[(i * nodes_per_segment) + j].edges.append(Edge(nodes[(i * nodes_per_segment) + j], nodes[(((i + 1) % num_segments) * nodes_per_segment) + k]))
-
-    print("Edges created")
 
     # --------------------
     # Shortest path search
@@ -156,11 +123,14 @@ def get_path(track, num_segments=50, nodes_per_segment=5):
     # print(track.left.calc_curvature())  # keep track if the point idx and use that to get the curvature at each point
     # track.right.calc_curvature
 
-    
+    ## PLACEHOLDER
 
+    points = []
+    for segment in segments:
+        points.append((segment[0].x, segment[0].y, 0))
 
+    path = wa.WASplinePath(points, num_points=1000)
 
-    # path = wa.WASplinePath(points, num_points=1000)
     # ------------
     # Plot results
     # ------------
@@ -171,8 +141,9 @@ def get_path(track, num_segments=50, nodes_per_segment=5):
         plt.subplot(1, 2, 1) 
         plt.axis('equal')
         # plot nodes 
-        for node in nodes: 
-            plt.plot(node.x, node.y, "ko")
+        for segment in segments:
+            for node in segment: 
+                plt.plot(node.x, node.y, "ko")
         # plot selected nodes
         for point in points:
             plt.plot(point[0], point[1], "ro")
@@ -196,7 +167,8 @@ def get_path(track, num_segments=50, nodes_per_segment=5):
         original_track.left.plot("black", show=False)
         original_track.right.plot("black")
 
-    # return path
+    return path
+
 
 if __name__ == "__main__":
     main()
