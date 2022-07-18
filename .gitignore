@@ -30,6 +30,7 @@ _version.py
 *.db3
 *.bag
 ATK-*
+*short-limit-line-10x4*
 
 # Ignore singularity specific files
 *singularity.temp
